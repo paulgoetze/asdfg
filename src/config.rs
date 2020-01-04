@@ -1,9 +1,11 @@
 use std::error::Error;
 use std::fs;
 use std::path::Path;
+use std::process;
 use yaml_rust::{yaml, Yaml, YamlLoader};
 
-pub const CONFIG_FILE: &str = "~/.asdfg/config.yaml";
+pub const CONFIG_DIR: &str = ".asdfg";
+pub const CONFIG_FILE: &str = "config.yaml";
 
 #[derive(Debug)]
 pub struct Package {
@@ -25,6 +27,7 @@ impl YamlConfig {
 
     pub fn parse(&self) -> Result<Vec<Package>, Box<dyn Error>> {
         let mut yaml = self.parse_yaml()?;
+
         let mut results = vec![];
 
         for entry in yaml.entries() {
@@ -40,6 +43,12 @@ impl YamlConfig {
         let path = Path::new(&self.file);
         let content = fs::read_to_string(path)?;
         let docs = YamlLoader::load_from_str(&content)?;
+
+        if docs.len() == 0 {
+            println!("Config is empty. Open and edit it with `asdfg config open`");
+            process::exit(1)
+        }
+
         let doc = docs[0].clone();
         let hash = doc.into_hash().unwrap();
 

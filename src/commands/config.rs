@@ -1,4 +1,5 @@
-use crate::config::{YamlConfig, CONFIG_FILE};
+use crate::config::{YamlConfig, CONFIG_DIR, CONFIG_FILE};
+use dirs;
 use std::error::Error;
 use std::fs;
 use std::path::Path;
@@ -16,20 +17,25 @@ pub enum Config {
 
 impl Config {
     pub fn run(&self) -> Result<(), Box<dyn Error>> {
+        let dir = Path::new(CONFIG_DIR);
+        let file = Path::new(CONFIG_FILE);
+        let path = dir.join(file);
+
         match self {
-            Config::List => list(CONFIG_FILE)?,
-            Config::Open => open(CONFIG_FILE)?,
+            Config::List => list(&path)?,
+            Config::Open => open(&path)?,
         }
 
         Ok(())
     }
 }
 
-pub fn list(file: &str) -> Result<(), Box<dyn Error>> {
-    let config = YamlConfig::new(file);
+fn list(path: &Path) -> Result<(), Box<dyn Error>> {
+    let config_file = config_file(path);
+    let config = YamlConfig::new(&config_file);
     let packages = config.parse()?;
 
-    let headline = format!("Configured packages from {}", file);
+    let headline = format!("Configured packages from {}", config_file);
     eprintln!("{}\n", headline);
 
     for package in packages {
@@ -41,14 +47,28 @@ pub fn list(file: &str) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-pub fn open(file: &str) -> Result<(), Box<dyn Error>> {
-    let path = Path::new(file);
-    let basedir = path.parent().unwrap();
+fn open(path: &Path) -> Result<(), Box<dyn Error>> {
+    let config_file = config_file(path);
+    let basedir = Path::new(&config_file).parent().unwrap();
 
-    // TODO: use absolute path, right now it creates a relative path
-    fs::create_dir_all(basedir)?;
-    fs::File::open(path)?;
-    open::that(file)?;
+    if !basedir.exists() {
+        fs::create_dir_all(basedir)?;
+    }
+
+    if !Path::new(&config_file).exists() {
+        fs::File::create(&config_file)?;
+    }
+
+    open::that(config_file)?;
 
     Ok(())
+}
+
+fn config_file(path: &Path) -> String {
+    let home = dirs::home_dir().unwrap();
+    let config_file = home.join(Path::new(path));
+    let config_file = config_file.to_str().unwrap().to_string();
+
+    println!("File: {:?}", config_file);
+    config_file
 }
