@@ -1,4 +1,6 @@
+use crate::asdf;
 use crate::commands::utils::NONE;
+use crate::config;
 use std::error::Error;
 use structopt::StructOpt;
 
@@ -15,7 +17,7 @@ impl Install {
         if self.package == NONE {
             install_all()?;
         } else {
-            install_package(&self.package)?;
+            install_by_name(&self.package)?;
         }
 
         Ok(())
@@ -23,12 +25,36 @@ impl Install {
 }
 
 fn install_all() -> Result<(), Box<dyn Error>> {
-    println!("Installing all");
+    let packages = config::load()?;
+
+    for package in packages {
+        install(&package)?;
+    }
+
     Ok(())
 }
 
-fn install_package(package: &String) -> Result<(), Box<dyn Error>> {
-    println!("Installing all versions for package {}", package);
+fn install_by_name(name: &String) -> Result<(), Box<dyn Error>> {
+    let packages = config::load()?;
+    let packages = packages
+        .iter()
+        .filter(|package| &package.name == name)
+        .collect::<Vec<_>>();
+
+    for package in packages {
+        install(&package)?;
+    }
+
+    Ok(())
+}
+
+fn install(package: &config::Package) -> Result<(), Box<dyn Error>> {
+    eprintln!("-----------------------------------");
+    eprintln!("{}:", package.name.to_uppercase());
+
+    asdf::add_plugin(&package.name)?;
+    asdf::install_package(package)?;
+
     Ok(())
 }
 

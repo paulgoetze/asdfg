@@ -1,5 +1,4 @@
-use crate::config::{YamlConfig, CONFIG_DIR, CONFIG_FILE};
-use dirs;
+use crate::config::{config_file, YamlConfig};
 use std::error::Error;
 use std::fs;
 use std::path::Path;
@@ -17,9 +16,7 @@ pub enum Config {
 
 impl Config {
     pub fn run(&self) -> Result<(), Box<dyn Error>> {
-        let dir = Path::new(CONFIG_DIR);
-        let file = Path::new(CONFIG_FILE);
-        let path = dir.join(file);
+        let path = config_file();
 
         match self {
             Config::List => list(&path)?,
@@ -30,12 +27,11 @@ impl Config {
     }
 }
 
-fn list(path: &Path) -> Result<(), Box<dyn Error>> {
-    let config_file = config_file(path);
-    let config = YamlConfig::new(&config_file);
+fn list(path: &String) -> Result<(), Box<dyn Error>> {
+    let config = YamlConfig::new(path);
     let packages = config.parse()?;
 
-    let headline = format!("Configured packages from {}", config_file);
+    let headline = format!("Configured packages from {}", path);
     eprintln!("{}\n", headline);
 
     for package in packages {
@@ -47,28 +43,18 @@ fn list(path: &Path) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn open(path: &Path) -> Result<(), Box<dyn Error>> {
-    let config_file = config_file(path);
-    let basedir = Path::new(&config_file).parent().unwrap();
+fn open(path: &String) -> Result<(), Box<dyn Error>> {
+    let basedir = Path::new(path).parent().unwrap();
 
     if !basedir.exists() {
         fs::create_dir_all(basedir)?;
     }
 
-    if !Path::new(&config_file).exists() {
-        fs::File::create(&config_file)?;
+    if !Path::new(path).exists() {
+        fs::File::create(path)?;
     }
 
-    open::that(config_file)?;
+    open::that(path)?;
 
     Ok(())
-}
-
-fn config_file(path: &Path) -> String {
-    let home = dirs::home_dir().unwrap();
-    let config_file = home.join(Path::new(path));
-    let config_file = config_file.to_str().unwrap().to_string();
-
-    println!("File: {:?}", config_file);
-    config_file
 }
