@@ -1,4 +1,5 @@
 use crate::commands::utils::NONE;
+use std::error::Error;
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
@@ -7,32 +8,29 @@ pub struct Install {
     #[structopt(default_value = NONE)]
     /// The name of the package to install
     pub package: String,
-
-    /// The version of the package to install
-    #[structopt(default_value = NONE)]
-    pub version: String,
 }
 
 impl Install {
-    pub fn run(&self) {
+    pub fn run(&self) -> Result<(), Box<dyn Error>> {
         if self.package == NONE {
-            install_all();
-        } else if self.version == NONE {
-            install_latest(&self.package);
+            install_all()?;
         } else {
-            install(&self.package, &self.version);
+            install_package(&self.package)?;
         }
+
+        Ok(())
     }
 }
 
-fn install_all() {
+fn install_all() -> Result<(), Box<dyn Error>> {
     println!("Installing all");
+    Ok(())
 }
 
-fn install_latest(package: &String) {
-    println!("Installing latest {}", package);
+fn install_package(package: &String) -> Result<(), Box<dyn Error>> {
+    println!("Installing all versions for package {}", package);
+    Ok(())
 }
 
-fn install(package: &String, version: &String) {
-    println!("Installing {} v{}", package, version);
-}
+#[cfg(test)]
+mod tests {}
