@@ -50,7 +50,8 @@ fn install_by_name(name: &String) -> Result<(), Box<dyn Error>> {
 
 fn install(package: &config::Package) -> Result<(), Box<dyn Error>> {
     eprintln!("-----------------------------------");
-    eprintln!("{}:", package.name.to_uppercase());
+    eprintln!("{}", package.name.to_uppercase());
+    eprintln!("-----------------------------------");
 
     asdf::add_plugin(&package.name)?;
     asdf::install_package(package)?;
