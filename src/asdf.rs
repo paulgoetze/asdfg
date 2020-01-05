@@ -1,4 +1,5 @@
 use crate::config;
+use colored::*;
 use std::error::Error;
 use std::process;
 
@@ -6,8 +7,8 @@ const BASE_CMD: &str = "asdf";
 pub const VERSION_LATEST: &str = "latest";
 
 pub fn add_plugin(name: &str) -> Result<(), Box<dyn Error>> {
-    let desc = format!("Adding asdf plugin: {}", name);
-    let error = format!("Plugin {} could not be installed.", name);
+    let desc = format!("Adding asdf plugin");
+    let error = format!("Plugin {} could not be installed.", name).red();
     run_cmd(&["plugin add", name], &desc, &error)?;
     eprintln!("---");
 
@@ -18,7 +19,7 @@ pub fn install_package(package: &config::Package) -> Result<(), Box<dyn Error>> 
     for mut version in &package.versions {
         let name = &package.name;
         let desc = format!("Installing {} ({})", name, version);
-        let error = format!("{} v{} could not be installed", name, version);
+        let error = format!("{} v{} could not be installed", name, version).red();
         run_cmd(&["install", &name, &version], &desc, &error)?;
 
         let available_versions = run_cmd_silent(&["list", name])?;
@@ -32,10 +33,8 @@ pub fn install_package(package: &config::Package) -> Result<(), Box<dyn Error>> 
         let error = format!("Failed to use global {} v{}", name, version);
         run_cmd(&["global", &name, &version], &desc, &error)?;
 
-        let desc = format!("Reshimming {}", name);
         let error = format!("Failed to reshim {}", name);
-        run_cmd(&["reshim", &name], &desc, &error)?;
-        eprintln!();
+        run_cmd(&["reshim", &name], "", &error)?;
     }
 
     Ok(())
@@ -50,11 +49,11 @@ fn run_cmd(args: &[&str], desc: &str, error: &str) -> Result<(), Box<dyn Error>>
         .expect(error);
 
     if !output.stdout.is_empty() {
-        eprintln!("{}", String::from_utf8(output.stdout).unwrap());
+        eprintln!("{}", String::from_utf8(output.stdout).unwrap().green());
     }
 
     if !output.stderr.is_empty() {
-        eprintln!("{}", String::from_utf8(output.stderr).unwrap());
+        eprintln!("{}", String::from_utf8(output.stderr).unwrap().yellow());
     }
 
     Ok(())
