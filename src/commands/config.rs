@@ -8,26 +8,34 @@ use structopt::StructOpt;
 /// Modify and show the asdfg YAML configuration
 pub enum Config {
     /// Prints the asdfg config to the terminal
-    List,
+    List {
+        /// The config file to use (defaults to ~/.asdfg/config.yaml)
+        #[structopt(short, long)]
+        config: Option<String>,
+    },
 
     /// Opens the asdfg config in your default editor
-    Open,
+    Open {
+        /// The config file to use (defaults to ~/.asdfg/config.yaml)
+        #[structopt(short, long)]
+        config: Option<String>,
+    },
 }
 
 impl Config {
     pub fn run(&self) -> Result<(), Box<dyn Error>> {
-        let path = config_file();
-
         match self {
-            Config::List => list(&path)?,
-            Config::Open => open(&path)?,
+            Config::List { config } => list(config)?,
+            Config::Open { config } => open(config)?,
         }
 
         Ok(())
     }
 }
 
-fn list(path: &String) -> Result<(), Box<dyn Error>> {
+fn list(file: &Option<String>) -> Result<(), Box<dyn Error>> {
+    let default_config = config_file(file);
+    let path = file.as_ref().unwrap_or(&default_config);
     let config = YamlConfig::new(path);
     let packages = config.parse()?;
 
@@ -43,7 +51,9 @@ fn list(path: &String) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn open(path: &String) -> Result<(), Box<dyn Error>> {
+fn open(file: &Option<String>) -> Result<(), Box<dyn Error>> {
+    let default_config = config_file(file);
+    let path = file.as_ref().unwrap_or(&default_config);
     let basedir = Path::new(path).parent().unwrap();
 
     if !basedir.exists() {

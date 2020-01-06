@@ -1,5 +1,4 @@
 use crate::asdf;
-use crate::commands::utils::NONE;
 use crate::config;
 use colored::*;
 use std::error::Error;
@@ -8,25 +7,28 @@ use structopt::StructOpt;
 #[derive(Debug, StructOpt)]
 /// Install asdf packages from the configured YAML file
 pub struct Install {
-    #[structopt(default_value = NONE)]
+    #[structopt()]
     /// The name of the package to install
-    pub package: String,
+    pub package: Option<String>,
+
+    /// The config file to use
+    #[structopt(short, long)]
+    config: Option<String>,
 }
 
 impl Install {
     pub fn run(&self) -> Result<(), Box<dyn Error>> {
-        if self.package == NONE {
-            install_all()?;
-        } else {
-            install_by_name(&self.package)?;
+        match &self.package {
+            Some(package) => install_by_name(&package, &self.config)?,
+            None => install_all(&self.config)?,
         }
 
         Ok(())
     }
 }
 
-fn install_all() -> Result<(), Box<dyn Error>> {
-    let packages = config::load()?;
+fn install_all(config_file: &Option<String>) -> Result<(), Box<dyn Error>> {
+    let packages = config::load(config_file)?;
 
     for package in packages {
         install(&package)?;
@@ -35,8 +37,8 @@ fn install_all() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn install_by_name(name: &String) -> Result<(), Box<dyn Error>> {
-    let packages = config::load()?;
+fn install_by_name(name: &String, config_file: &Option<String>) -> Result<(), Box<dyn Error>> {
+    let packages = config::load(config_file)?;
     let packages = packages
         .iter()
         .filter(|package| &package.name == name)

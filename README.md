@@ -16,7 +16,7 @@ You can open the asdfg YAML configuration file with your default editor by runni
 $ asdfg config open
 ```
 
-The YAML config is by default stored in `~/.asdfg/config.yaml`.
+The YAML config is by default stored in `~/.asdfg/config.yaml`. You can customise the config path with the `--config` or `-c` option.
 
 Add the asdf packages you want to install with their respective versions here, e.g.:
 

@@ -1,7 +1,7 @@
 use dirs;
 use std::error::Error;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process;
 use yaml_rust::{yaml, Yaml, YamlLoader};
 
@@ -20,10 +20,8 @@ pub struct YamlConfig {
 }
 
 impl YamlConfig {
-    pub fn new(file: &str) -> YamlConfig {
-        YamlConfig {
-            file: String::from(file),
-        }
+    pub fn new(file: &String) -> YamlConfig {
+        YamlConfig { file: file.clone() }
     }
 
     pub fn parse(&self) -> Result<Vec<Package>, Box<dyn Error>> {
@@ -76,19 +74,25 @@ impl YamlConfig {
     }
 }
 
-pub fn config_file() -> String {
-    let dir = Path::new(CONFIG_DIR);
-    let file = Path::new(CONFIG_FILE);
-    let path = dir.join(file);
-    let home = dirs::home_dir().unwrap();
-    let config_file = home.join(Path::new(&path));
+pub fn config_file(path: &Option<String>) -> String {
+    let config_file = match path {
+        Some(s) => PathBuf::from(s),
+        _ => {
+            let dir = Path::new(CONFIG_DIR);
+            let file = Path::new(CONFIG_FILE);
+            let default_path = dir.join(file);
+            let home = dirs::home_dir().unwrap();
+            home.join(Path::new(&default_path))
+        }
+    };
+
     let config_file = config_file.to_str().unwrap().to_string();
 
     eprintln!("Using config: {}\n", config_file);
     config_file
 }
 
-pub fn load() -> Result<Vec<Package>, Box<dyn Error>> {
-    let file = config_file();
+pub fn load(file: &Option<String>) -> Result<Vec<Package>, Box<dyn Error>> {
+    let file = config_file(file);
     YamlConfig::new(&file).parse()
 }
