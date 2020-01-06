@@ -4,7 +4,7 @@ use std::error::Error;
 use std::process;
 
 const BASE_CMD: &str = "asdf";
-pub const VERSION_LATEST: &str = "latest";
+const VERSION_LATEST: &str = "latest";
 
 pub fn add_plugin(name: &str) -> Result<(), Box<dyn Error>> {
     let desc = format!("Adding asdf plugin");
@@ -16,26 +16,43 @@ pub fn add_plugin(name: &str) -> Result<(), Box<dyn Error>> {
 }
 
 pub fn install_package(package: &config::Package) -> Result<(), Box<dyn Error>> {
-    for mut version in &package.versions {
+    for version in &package.versions {
         let name = &package.name;
-        let desc = format!("Installing {} ({})", name, version);
-        let error = format!("{} v{} could not be installed", name, version).red();
-        run_cmd(&["install", &name, &version], &desc, &error)?;
-
-        let available_versions = run_cmd_silent(&["list", name])?;
-        let last_version = available_versions.last().unwrap();
-
-        if version == VERSION_LATEST {
-            version = last_version;
-        }
-
-        let desc = format!("Setting global {} version to {}", name, version);
-        let error = format!("Failed to use global {} v{}", name, version);
-        run_cmd(&["global", &name, &version], &desc, &error)?;
-
-        let error = format!("Failed to reshim {}", name);
-        run_cmd(&["reshim", &name], "", &error)?;
+        install_version(name, version)?;
+        set_global(name, version)?;
+        reshim(name)?;
     }
+
+    Ok(())
+}
+
+fn install_version(name: &String, version: &String) -> Result<(), Box<dyn Error>> {
+    let desc = format!("Installing {} ({})", name, version);
+    let error = format!("{} v{} could not be installed", name, version).red();
+    run_cmd(&["install", &name, &version], &desc, &error)?;
+
+    Ok(())
+}
+
+fn set_global(name: &String, version: &String) -> Result<(), Box<dyn Error>> {
+    let mut final_version = &version.clone();
+    let available_versions = run_cmd_silent(&["list", name])?;
+    let last_version = available_versions.last().unwrap();
+
+    if final_version == VERSION_LATEST {
+        final_version = last_version;
+    }
+
+    let desc = format!("Setting global {} version to {}", name, final_version);
+    let error = format!("Failed to use global {} v{}", name, final_version);
+    run_cmd(&["global", &name, &version], &desc, &error)?;
+
+    Ok(())
+}
+
+fn reshim(name: &String) -> Result<(), Box<dyn Error>> {
+    let error = format!("Failed to reshim {}", name);
+    run_cmd(&["reshim", &name], "", &error)?;
 
     Ok(())
 }
