@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Paul Götze <paul.christoph.goetze@gmail.com>"]
 edition = "2018"
 repository = "https://github.com/paulgoetze/asdfg"
+description="Installing global asdf packages from a YAML config"
 keywords = ["asdf", "cli"]
 categories = ["command-line-utilities", "config"]
 readme = "README.md"
