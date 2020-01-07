@@ -6,7 +6,17 @@ asdfg requires [asdf](https://asdf-vm.com) to be installed and allows to configu
 
 ## Installation
 
-TBD
+Install it via cargo:
+
+```
+$ cargo install asdfg
+```
+
+or install it manually:
+
+* download the `asdfg` binary file from https://github.com/paulgoetze/asdfg/releases.
+* move it into your favorite directory
+* add the `asdfg` executable to your system path
 
 ## Getting Started
 
