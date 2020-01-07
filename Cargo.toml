@@ -7,7 +7,6 @@ repository = "https://github.com/paulgoetze/asdfg"
 keywords = ["asdf", "cli"]
 categories = ["command-line-utilities", "config"]
 readme = "README.md"
-license = "GPLv3"
 license-file = "LICENSE"
 
 [dependencies]
