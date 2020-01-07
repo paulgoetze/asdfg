@@ -45,7 +45,7 @@ fn set_global(name: &String, version: &String) -> Result<(), Box<dyn Error>> {
 
     let desc = format!("Setting global {} version to {}", name, final_version);
     let error = format!("Failed to use global {} v{}", name, final_version);
-    run_cmd(&["global", &name, &version], &desc, &error)?;
+    run_cmd(&["global", &name, &final_version], &desc, &error)?;
 
     Ok(())
 }
