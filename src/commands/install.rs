@@ -11,7 +11,7 @@ pub struct Install {
     /// The name of the package to install
     pub package: Option<String>,
 
-    /// The config file to use
+    /// The config file to use (defaults to ~/.asdfg/config.yaml)
     #[structopt(short, long)]
     config: Option<String>,
 }
