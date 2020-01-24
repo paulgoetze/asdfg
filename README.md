@@ -15,6 +15,7 @@ $ cargo install asdfg
 or install it manually:
 
 * download the `asdfg` binary file from https://github.com/paulgoetze/asdfg/releases.
+* make it executable by running `sudo chmod +x asdfg`
 * move it into your favorite directory
 * add the `asdfg` executable to your system path
 
