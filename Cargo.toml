@@ -2,7 +2,7 @@
 name = "asdfg"
 version = "0.2.0"
 authors = ["Paul Götze <paul.christoph.goetze@gmail.com>"]
-edition = "2018"
+edition = "2021"
 repository = "https://github.com/paulgoetze/asdfg"
 description="Installing global asdf packages from a YAML config"
 keywords = ["asdf", "cli"]
